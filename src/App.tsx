@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import SearchBar from './components/SearchBar';
-import { searchByName } from './lib/wikipediaApi';
-
-type SearchResultItem = {
-  heading: string,
-  abst: string,
-  link: string
-};
+import { searchByName, SearchResultItem } from './lib/wikipediaApi';
 
 function App() {
   const [searchTitle, setSearchTitle] = useState<string>("");
@@ -16,11 +10,10 @@ function App() {
     setSearchTitle(name);
     if (name) {
       searchByName(name).then((data) => {
-        const headings: string[] = data[1];
-        const absts: string[] = data[2];
-        const links: string[] = data[3];
-        setSearchResults(headings.map((heading, i) => ({heading, abst: absts[i], link: links[i]})))
+        setSearchResults(data);
       })
+    } else {
+      setSearchResults([]);
     }
   }
 

@@ -5,7 +5,13 @@ const templateHeader = {
 };
 const targetURL = "https://ja.wikipedia.org/w/api.php";
 
-export const searchByName = async (name: string) => {
+export type SearchResultItem = {
+  heading: string,
+  abst: string,
+  link: string
+};
+
+export const searchByName = async (name: string): Promise<SearchResultItem[]> => {
   const query = new URLSearchParams({
     origin: "*",
     action: "opensearch",
@@ -20,5 +26,8 @@ export const searchByName = async (name: string) => {
     headers: new Headers(templateHeader)
   }).then((response) => (response.json()));
 
-  return data;
+  const headings: string[] = data[1];
+  const absts: string[] = data[2];
+  const links: string[] = data[3];
+  return headings.map((heading, i) => ({heading, abst: absts[i], link: links[i]}));
 };
