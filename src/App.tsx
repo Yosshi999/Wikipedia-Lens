@@ -27,10 +27,9 @@ function App() {
         )}
       </div>
       <div>
-        {searchResults.map(({heading, abst}) => (
+        {searchResults.map(({heading, link}) => (
           <div>
-            <h3>{heading}</h3>
-            <h4>{abst}</h4>
+            <a href={link}>{heading}</a>
           </div>
         ))}
       </div>
