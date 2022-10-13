@@ -31,3 +31,23 @@ export const searchByName = async (name: string): Promise<SearchResultItem[]> =>
   const links: string[] = data[3];
   return headings.map((heading, i) => ({heading, abst: absts[i], link: links[i]}));
 };
+
+export const getLatestRevision = async (name: string) => {
+  const query = new URLSearchParams({
+    origin: "*",
+    action: "query",
+    prop: "revisions",
+    titles: name,
+    rvprop: "content|timestamp|user|sha1|comment",
+    rvslots: "main",
+    formatversion: "2",
+    format: "json"
+  });
+
+  const data = await fetch(targetURL + "?" + query, {
+    method: "GET",
+    headers: new Headers(templateHeader)
+  }).then((response) => (response.json()));
+
+  return data;
+};
