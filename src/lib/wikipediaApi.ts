@@ -1,35 +1,55 @@
+// See https://www.mediawiki.org/wiki/API:REST_API
+
 const version = "0.0"
 
 const templateHeader = {
   "Api-User-Agent": `WikipediaLens/${version} (https://github.com/Yosshi999/Wikipedia-Lens)`
 };
-const targetURL = "https://ja.wikipedia.org/w/api.php";
+const actionURL = "https://ja.wikipedia.org/w/api.php";
+const restURL = "https://ja.wikipedia.org/w/rest.php/v1";
+
+// https://www.mediawiki.org/wiki/API:REST_API/Reference#Search_result_object
+type RestSearchResult = {
+  id: number,  // Page identifier
+  key: string,  // Page title in URL-friendly format
+  title: string,  // Page title in reading-friendly format
+  excerpt: string,  // A few lines giving a sample of page content with search terms highlighted with <span class=\"searchmatch\"> tags
+  matched_title?: string | null,  // The title of the page redirected from, if the search term originally matched a redirect page or null if search term did not match a redirect page.
+  description: string | null,  // Short summary of the page topic based on the corresponding entry on Wikidata or null if no entry exists
+  thumbnail: null | {
+    mimetype: string,
+    size: number | null,
+    width: number | null,
+    height: number | null,
+    duration: number | null,
+    url: string,
+  },  // Information about the thumbnail image for the page or null if no thumbnail exists.
+}
 
 export type SearchResultItem = {
   heading: string,
   abst: string,
-  link: string
+  key: string
 };
 
 export const searchByName = async (name: string): Promise<SearchResultItem[]> => {
   const query = new URLSearchParams({
-    origin: "*",
-    action: "opensearch",
-    search: name,
-    limit: "5",
-    namespace: "0",
-    format: "json"
+    q: name,
+    limit: "5"
   });
 
-  const data = await fetch(targetURL + "?" + query, {
+  const data: {pages: RestSearchResult[]} = await fetch(restURL + "/search/title?" + query, {
     method: "GET",
     headers: new Headers(templateHeader)
-  }).then((response) => (response.json()));
+  }).then((response) => response.json());
 
-  const headings: string[] = data[1];
-  const absts: string[] = data[2];
-  const links: string[] = data[3];
-  return headings.map((heading, i) => ({heading, abst: absts[i], link: links[i]}));
+  return data.pages.map(({key, title, description}) => {
+    return {
+      key,
+      heading: title,
+      abst: (description === null) ? "" : description,
+    };
+  });
 };
 
 export const getLatestRevision = async (name: string) => {
@@ -44,7 +64,7 @@ export const getLatestRevision = async (name: string) => {
     format: "json"
   });
 
-  const data = await fetch(targetURL + "?" + query, {
+  const data = await fetch(actionURL + "?" + query, {
     method: "GET",
     headers: new Headers(templateHeader)
   }).then((response) => (response.json()));
