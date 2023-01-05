@@ -28,7 +28,7 @@ const CommitUser = styled.div`
 `;
 const CommitComment = styled.div`
   color: gray;
-  width: 70%;
+  max-width: 70%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
